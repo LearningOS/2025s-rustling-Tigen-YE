@@ -2,11 +2,12 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
+use std::cmp::Ordering;
+
 
 #[derive(Debug)]
 struct Node<T> {
@@ -70,13 +71,39 @@ impl<T> LinkedList<T> {
         }
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+        where T: Ord
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		let mut list_c = Self::new();
+        let mut ptr_a = list_a.start;
+        let mut ptr_b = list_b.start;
+
+        unsafe {
+            while let (Some(a), Some(b)) = (ptr_a, ptr_b){
+                let val_a = &(*a.as_ptr()).val;
+                let val_b = &(*b.as_ptr()).val;
+                
+                match val_a.cmp(val_b){
+                    Ordering::Less => {
+                        list_c.add(std::ptr::read(val_a));
+                        ptr_a = (*a.as_ptr()).next;
+                    }
+                    _ => {
+                        list_c.add(std::ptr::read(val_b));
+                        ptr_b = (*b.as_ptr()).next;
+                    }
+                }
+            };
+            while let Some(a) = ptr_a {
+                list_c.add(std::ptr::read(&(*a.as_ptr()).val));
+                ptr_a = (*a.as_ptr()).next;
+            }
+            while let Some(b) = ptr_b {
+                list_c.add(std::ptr::read(&(*b.as_ptr()).val));
+                ptr_b = (*b.as_ptr()).next;
+            }
         }
+        list_c
 	}
 }
 
